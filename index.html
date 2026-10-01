@@ -1,0 +1,918 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sprawdzian: Spotkanie z przyrodą</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22 font-size=%2280%22><text y=%2280%22>%F0%9F%8C%BF</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg1:#ecfdf5; --bg2:#e0f2fe; --primary:#15803d; --primary-dark:#166534; --primary-soft:#dcfce7;
+    --good:#16a34a; --bad:#dc2626; --text:#1e293b; --card-bg:#ffffff;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;min-height:100vh;
+    font-family:'Quicksand','Trebuchet MS',-apple-system,sans-serif;
+    background:linear-gradient(160deg,var(--bg1),var(--bg2));
+    color:var(--text);padding:16px;
+  }
+  .wrap{max-width:640px;margin:0 auto;}
+  header{text-align:center;margin-bottom:20px;}
+  h1{font-size:1.7rem;margin:0 0 4px;}
+  .subtitle{margin:0;color:#475569;}
+  .card{background:var(--card-bg);border-radius:24px;padding:24px;box-shadow:0 10px 30px rgba(21,128,61,0.12);text-align:center;}
+  .primary-btn{background:var(--primary);color:#fff;border:none;border-radius:14px;padding:14px 28px;font-size:1.1rem;font-weight:700;cursor:pointer;margin-top:16px;font-family:inherit;transition:transform .15s, background .15s;}
+  .primary-btn:hover{background:var(--primary-dark);transform:translateY(-2px);}
+  .primary-btn:disabled{opacity:.5;cursor:default;transform:none;}
+  .progress-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+  .progress-bar{flex:1;height:10px;background:#e2e8f0;border-radius:6px;overflow:hidden;}
+  .progress-fill{height:100%;background:var(--primary);transition:width .3s;width:0;}
+  #progress-text{font-size:.85rem;color:#64748b;white-space:nowrap;}
+  .score-row{text-align:right;font-weight:700;color:var(--primary);margin-bottom:4px;}
+  .q-number{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--primary);background:var(--primary-soft);border-radius:8px;padding:3px 12px;margin-bottom:10px;}
+  .q-instruction{font-size:1.08rem;font-weight:700;margin:8px 0;text-align:left;}
+  .q-context{font-size:.95rem;color:#475569;margin:6px 0 14px;text-align:left;background:#f8fafc;border-left:4px solid #cbd5e1;padding:10px 14px;border-radius:8px;line-height:1.45;}
+  .figure{margin:10px auto;}
+  .figure svg{width:100%;max-width:200px;height:auto;display:block;margin:0 auto;}
+  .options{display:grid;gap:10px;margin-top:16px;grid-template-columns:repeat(2,1fr);}
+  .options.one-col{grid-template-columns:1fr;}
+  @media (max-width:420px){ .options{grid-template-columns:1fr;} }
+  .opt-btn{border:2px solid #cbd5e1;background:#f8fafc;border-radius:14px;padding:12px;font-size:1.02rem;font-weight:700;cursor:pointer;font-family:inherit;color:var(--text);transition:all .15s;}
+  .opt-btn:hover:not(:disabled){border-color:var(--primary);}
+  .opt-btn:disabled{cursor:default;}
+  .opt-btn.selected{border-color:var(--primary);background:var(--primary-soft);}
+  .opt-btn.correct{border-color:var(--good);background:#dcfce7;color:#166534;}
+  .opt-btn.wrong{border-color:var(--bad);background:#fee2e2;color:#991b1b;}
+  .opt-btn.missed{border-color:var(--good);border-style:dashed;}
+  .opt-btn svg{width:70px;height:70px;display:block;margin:0 auto;}
+  .input-row{display:flex;gap:10px;justify-content:center;align-items:center;margin-top:10px;flex-wrap:wrap;}
+  .answer-input{width:160px;padding:10px;font-size:1.15rem;border:2px solid #cbd5e1;border-radius:12px;text-align:center;font-family:inherit;}
+  .answer-input.correct{border-color:var(--good);background:#dcfce7;}
+  .answer-input.wrong{border-color:var(--bad);background:#fee2e2;}
+  .check-btn{background:var(--primary);color:#fff;border:none;border-radius:12px;padding:10px 20px;font-weight:700;cursor:pointer;font-family:inherit;font-size:1rem;}
+  .check-btn:disabled{opacity:.6;cursor:default;}
+  .ghost-btn{background:none;border:2px solid #cbd5e1;color:#475569;border-radius:12px;padding:8px 16px;font-weight:700;cursor:pointer;font-family:inherit;}
+  .ghost-btn:disabled{opacity:.5;cursor:default;}
+  .center-row{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+  /* sortowanie */
+  .sort-list{display:grid;gap:8px;margin-top:14px;text-align:left;}
+  .sort-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border:2px solid #e2e8f0;border-radius:14px;padding:8px 10px;background:#f8fafc;}
+  .sort-row.correct{border-color:var(--good);background:#f0fdf4;}
+  .sort-row.wrong{border-color:var(--bad);background:#fef2f2;}
+  .sort-item{flex:1 1 150px;font-weight:700;}
+  .sort-cats{display:flex;gap:6px;flex-wrap:wrap;}
+  .sort-item svg{width:60px;height:60px;display:block;}
+  .sort-item:has(svg){flex:0 0 64px;}
+  .cat-btn{border:2px solid #cbd5e1;background:#fff;border-radius:10px;padding:6px 10px;font-size:.85rem;font-weight:700;cursor:pointer;font-family:inherit;color:var(--text);}
+  .cat-btn.selected{border-color:var(--primary);background:var(--primary-soft);}
+  .cat-btn.should{border-color:var(--good);border-style:dashed;background:#dcfce7;}
+  .sort-row.wrong .cat-btn.selected{border-color:var(--bad);background:#fee2e2;color:#991b1b;}
+  .cat-btn:disabled{cursor:default;}
+  /* kolejność */
+  .order-btn{position:relative;text-align:left;padding-left:44px;}
+  .order-btn .badge{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:50%;background:#e2e8f0;color:#64748b;display:flex;align-items:center;justify-content:center;font-size:.9rem;}
+  .order-btn.selected .badge{background:var(--primary);color:#fff;}
+  .feedback{min-height:28px;margin-top:14px;font-weight:700;font-size:1.02rem;}
+  .feedback-good{color:var(--good);}
+  .feedback-bad{color:var(--bad);}
+  .hint-box{margin-top:10px;padding:10px 14px;background:#fef9c3;border:1px solid #fde68a;border-radius:12px;font-size:.92rem;font-weight:500;color:#78350f;text-align:left;line-height:1.4;}
+  .hint-box strong{color:#78350f;}
+  footer{text-align:center;margin-top:20px;color:#94a3b8;font-size:.85rem;}
+  h2{margin-top:0;color:var(--primary);}
+  .info-box{background:var(--primary-soft);border-radius:14px;padding:12px 16px;margin:10px 0 16px;text-align:left;font-size:.95rem;line-height:1.5;}
+  .info-box b{color:var(--primary-dark);}
+  /* wybór lekcji + wyniki */
+  .lesson-pick{display:grid;gap:6px;text-align:left;margin:14px 0 4px;}
+  .lesson-pick label{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:12px;background:#f8fafc;border:2px solid #e2e8f0;cursor:pointer;font-weight:700;}
+  .lesson-pick input{width:18px;height:18px;accent-color:var(--primary);}
+  .lesson-pick .cnt{margin-left:auto;font-size:.8rem;color:#64748b;font-weight:500;}
+  .pick-tools{display:flex;justify-content:space-between;align-items:center;font-size:.85rem;color:#64748b;flex-wrap:wrap;gap:8px;}
+  .link-btn{background:none;border:none;color:var(--primary);font-weight:700;cursor:pointer;font-family:inherit;padding:0;}
+  .breakdown{text-align:left;display:grid;gap:8px;margin:16px 0;}
+  .bd-row{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;font-size:.92rem;}
+  .bd-bar{grid-column:1 / -1;height:8px;background:#e2e8f0;border-radius:6px;overflow:hidden;}
+  .bd-fill{height:100%;border-radius:6px;}
+  .bd-score{font-weight:700;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🌿 Sprawdzian z działu</h1>
+    <p class="subtitle">Spotkanie z przyrodą — przyroda, nauka, ekrany, zmysły, doświadczenia, mikroskop, kompas</p>
+  </header>
+
+  <section id="start-screen" class="card">
+    <p>Sprawdzian powstał na podstawie rozdziału I podręcznika „Spotkanie z przyrodą". Są w nim zwykłe pytania z odpowiedziami do wyboru, ale też sortowanie, układanie kolejności i wpisywanie odpowiedzi. Powodzenia!</p>
+    <div class="pick-tools">
+      <span>Które lekcje sprawdzamy?</span>
+      <span><button class="link-btn" id="pick-all">zaznacz wszystkie</button> · <button class="link-btn" id="pick-none">odznacz</button></span>
+    </div>
+    <div class="lesson-pick" id="lesson-pick"></div>
+    <button id="start-btn" class="primary-btn">Rozpocznij sprawdzian</button>
+  </section>
+
+  <section id="quiz-screen" class="card" hidden>
+    <div class="progress-row">
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+      <span id="progress-text"></span>
+    </div>
+    <div class="score-row">Wynik: <span id="score-text">0</span>/<span id="score-total">0</span></div>
+    <div class="q-number" id="q-number"></div>
+    <div id="question-area"></div>
+    <div class="feedback" id="feedback"></div>
+    <button id="next-btn" class="primary-btn" hidden>Dalej ▶</button>
+  </section>
+
+  <section id="result-screen" class="card" hidden>
+    <h2 id="result-title"></h2>
+    <p id="result-desc"></p>
+    <div class="breakdown" id="breakdown"></div>
+    <button id="restart-btn" class="primary-btn">Zagraj ponownie</button>
+  </section>
+
+  <footer>
+    <p>Na podstawie podręcznika do przyrody dla klasy 4 — rozdział I „Spotkanie z przyrodą".</p>
+  </footer>
+</div>
+
+<script>
+"use strict";
+
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+function uid(){ return 'x'+Math.random().toString(36).slice(2); }
+
+/* =========================================================
+   RYSUNKI (SVG)
+   ========================================================= */
+const DIRS = {
+  N:{deg:0,name:'północ'}, NE:{deg:45,name:'północny wschód'}, E:{deg:90,name:'wschód'}, SE:{deg:135,name:'południowy wschód'},
+  S:{deg:180,name:'południe'}, SW:{deg:225,name:'południowy zachód'}, W:{deg:270,name:'zachód'}, NW:{deg:315,name:'północny zachód'}
+};
+// Róża kierunków: podpisana tylko północ, wybrany kierunek wyróżniony na czerwono ze znakiem zapytania
+function compassRoseSVG(highlight){
+  const s=200, c=s/2;
+  let rays='';
+  Object.entries(DIRS).forEach(([k,d])=>{
+    const main = k.length===1;
+    const len = main ? 78 : 52;
+    const w = main ? 12 : 8;
+    const isH = k===highlight;
+    const fill = isH ? '#dc2626' : (main ? '#5b9aa9' : '#f2a3ae');
+    rays += `<polygon points="${c},${c-len} ${c+w},${c} ${c},${c+6} ${c-w},${c}" fill="${fill}" transform="rotate(${d.deg} ${c} ${c})"/>`;
+  });
+  // rysuj wyróżniony promień jeszcze raz na wierzchu
+  const hd = DIRS[highlight];
+  const hlen = highlight.length===1 ? 78 : 52, hw = highlight.length===1 ? 12 : 8;
+  rays += `<polygon points="${c},${c-hlen} ${c+hw},${c} ${c},${c+6} ${c-hw},${c}" fill="#dc2626" transform="rotate(${hd.deg} ${c} ${c})"/>`;
+  const rad = hd.deg*Math.PI/180, qr = hlen+12;
+  const qx = c + qr*Math.sin(rad), qy = c - qr*Math.cos(rad);
+  return `<svg viewBox="0 0 ${s} ${s}" role="img" aria-label="Róża kierunków">
+    <circle cx="${c}" cy="${c}" r="94" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+    ${rays}
+    <circle cx="${c}" cy="${c}" r="5" fill="#334155"/>
+    <text x="${c}" y="14" text-anchor="middle" font-size="15" font-weight="800" fill="#1e293b">N</text>
+    ${highlight==='N' ? '' : `<circle cx="${qx.toFixed(1)}" cy="${qy.toFixed(1)}" r="11" fill="#fff" stroke="#dc2626" stroke-width="2"/><text x="${qx.toFixed(1)}" y="${(qy+5).toFixed(1)}" text-anchor="middle" font-size="14" font-weight="800" fill="#dc2626">?</text>`}
+  </svg>`;
+}
+
+// Piktogramy GHS (oficjalne symbole ostrzegawcze, domena publiczna – Wikimedia Commons)
+const HAZARDS = {
+  flame:'łatwopalna', skull:'toksyczna (trująca)', excl:'drażniąca', corr:'żrąca', env:'szkodliwa dla środowiska'
+};
+const GHS_SVG = {
+ "flame": "<svg role=\"img\" aria-label=\"symbol ostrzegawczy\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.0\" viewBox=\"0 0 579 579\"><path d=\"m25 290 264 264 264-264L289 26 25 290z\" fill=\"#fff\"/><path d=\"M148 148 6 290l142 141 141 142 142-142 142-141-142-142L289 6 148 148zm261 22 119 120-119 119-120 119-119-119L51 290l119-120L289 51l120 119z\" fill=\"red\"/><path d=\"M290 121c-18 34 3 53-20 102-13-10-6-47-30-48 3 12 1 16 0 20-3 17-8 31 3 52-17-8-18-23-32-33 3 16-4 49 15 81-17-2-23-8-41-26 19 100 34 103 105 109-6-1-42-7-55-48 0-10-1 9 34 10-22-35-16-28-14-48 10 13 2 15 27 25-8-26 13-43 8-73 6 13 26 11 25 73 17-19 18-6 26-26 1 11 6 25-17 49 6 2 16 3 31-8-15 18-1 18-40 46 49 1 81-30 80-97-2 6-3 18-29 21 16-16 25-49 12-75-5 4-12 24-29 29 8-14 6-32 6-32s3-25-12-45c-4 30-4 46-23 50 3-17 4-26-6-46-10-21-22-42-24-62zm-81 274v18h171v-18H209z\"/></svg>",
+ "skull": "<svg role=\"img\" aria-label=\"symbol ostrzegawczy\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 735 735\"> <path d=\"m367.5 727.4l360-360-360-360-360 360z\" fill=\"#f00\"/> <path d=\"m367.5 670.3-302.8-302.8l302.8-302.8 302.8 302.8z\" fill=\"#fff\"/> <path d=\"m361.6 364.2c8.23 0 5.45-3.33 12.48-3.33 5.73 0 3.79 3.24 11.56 3.24 7.21 0 8.97-5.45 8.97-7.67 0-3.42-3.88-5.62-5.64-10.26-1.76-4.62-5.18-21.72-15.62-21.72-3.84 0-6.1 1.57-8.97 4.99-4.71 5.55-5.09 14.87-8 18.49-2.87 3.51-3.98 7.28-3.98 9.25 0 2.13 1.02 7 9.25 7m-80.55 58.51-7.9 3.74c-7.91 3.81-17.78 11.77-19.83 28.1-.34 2.68-6.39 9.79-12.59 9.79-3.81 0-8.32-2.52-8.94-6.27-1.08-6.44-5.95-29.55-6.16-30.53-.6-2.85-3.4-4.68-6.26-4.07s-4.68 3.4-4.07 6.26c.001.06.76 3.65.76 3.65-9.18-4.38-9.56-5.17-9.56-8.33 0-3.9 9-8.87 16.1-8.87 5.97 0 10.54 1.71 14.97 3.36 4 1.5 8.13 3.04 12.8 3.04 6.72 0 8.64-.68 11.73-2.35l2.6-1.27c4.07-1.71 35.64-16.78 49.55-23.43 1.94 2.78 4.26 5.57 6.94 8.25m-3.3-52c12.29 7.63 12.1 7.29 12.16 12.1-.15 1.3-.2 3.44-.2 7.41 0 13.1 25.5 24.1 41.52 24.1 17.77 0 41.3-12 41.3-24.49v-6.74c0-5.32.56-5.81 10.83-11.84v24.99c0 6.99-9.58 21.91-26.89 30.62l-.56.28c-8.38 4.21-18.8 9-23.1 9-3.97 0-17.41-3.92-28.1-9.31-17.32-8.7-26.89-23.63-26.89-30.62zm-108-40.9c-.02.0010-.04.03-.07.04.02-.0010.04-.03.07-.04m310.9-9.9c2.33 0 3.34.76 3.9 1.34 3.4 3.51 3.07 13.78 2.84 21.28l-.13 5.95c-.06 2.92 2.25 5.21 5.16 5.28 2.91.06 5.33-2.36 5.4-5.28l.05-2.13c.3.81.44 1.5.44 1.95v10.16c0 2.88-.84 6.32-4.82 6.32-3.27 0-7.46-2.04-11.5-4-4.66-2.27-9.1-4.42-13.57-4.42l-.76-.03c-2.63-.13-8.11-.38-15.83 3.23l-.15.07-57.75 29.3v-14.68c8.54-3.9 41.3-18.92 49.4-23.1 9.13-4.7 16.1-14.75 20.2-20.76l1.59-2.27c2.75-3.78 8.47-8.19 15.56-8.19zm-266.4 39.7-.08-.03c-7.72-3.62-13.2-3.36-15.83-3.23l-.76.03c-4.5 0-8.91 2.15-13.57 4.42-4 1.97-8.22 4-11.5 4-3.99 0-4.82-3.43-4.82-6.32v-10.16c0-.45.14-1.14.44-1.95l.05 2.12c.06 2.92 2.48 5.34 5.4 5.28 2.91-.06 5.23-2.36 5.16-5.28l-.13-5.95c-.24-7.5-.56-17.77 2.83-21.28.56-.57 1.57-1.34 3.9-1.34 7.09 0 12.82 4.41 15.57 8.19l1.59 2.27c4.14 6 11.1 16.1 20.2 20.76 7.08 3.65 32.3 15.23 44.58 20.87v14.45zm117.1-164.8c29.36 0 43.62 12.25 61.7 28.68l9.58 8.59 3.57 3.1c11.48 9.95 22.33 19.35 22.33 24.92 0 6.9-2.41 13.78-5.68 20.2.38-2.35.4-3.9.4-6.89 0-11.37-3.14-16.27-14.75-28.41l-7.63 7.3c10.88 11.37 11.82 13.79 11.82 21.1 0 4.55 0 4.55-2.31 14.8l-3.06 13.74.35 1.25c.04.13 3.59 13.18 3.59 25.7 0 13.1-8 17.98-18.1 24.2l-3.18 1.96-10.89 6.56c-11.5 6.75-17.23 9.73-17.23 21.52v6.74c0 3.91-14.78 13.93-30.53 13.93-14.46 0-30.38-10-30.96-13.64 0-4.83.21-6.92.21-6.92 0-11.56-5.6-14.81-16.77-21.29-3.11-1.8-6.97-4.05-11.52-6.9l-3.18-1.96c-10.14-6.2-17.38-9.72-17.38-24.2 0-15.23 3.63-20.67 3.63-25.37s-5.07-23-5.07-25.87c0-.37.04-3.46.04-3.46 0-6.85.87-12.57 11.46-21.98.86-.76 2.17-3.09 1.12-4.38s-1.47-1.83-2.69-3.27c-.61-.72-1.72-1-2.79-1.01-1.07 0-2.11.28-2.58.7-12.53 11.13-15.1 19.56-15.1 29.94 0 0-.04 3.09-.04 3.55 0 2.82-.12 1.4 1.33 7.33-4.52-7.66-8.32-16.28-8.32-24.95 0-5.39 10.33-14.75 21.27-24.65l4.78-4.34c3.78-3.45 7.1-6.67 10.24-9.79 7.24-7.11 12.95-12.72 19.6-16.1 14.99-7.6 28.6-10.4 42.82-10.4m-62.3 210.5c-18.32 8.76-45.1 21.53-48.57 22.98l-3.52 1.71c-1.53.83-2 1.07-6.71 1.07-2.75 0-5.69-1.1-9.1-2.37-4.81-1.8-10.79-4-18.67-4-10.86 0-26.64 7.57-26.64 19.43 0 10.56 6.77 13.73 17.98 19l4.82 2.29c1.13 5.54 2.21 10.95 2.63 13.48 1.57 9.44 11.1 15.1 19.36 15.1 11.8 0 22.1-11.55 23.1-19 1.19-9.47 5.74-15.99 13.92-19.92l7.79-3.69 44.5-20.95c3.05 2.19 6.36 4.23 9.92 6 8.71 4.38 25.2 10.86 32.88 10.86 6.82 0 17-5.14 28.1-10.72 4.76-2.39 8.84-5 12.49-7.87l54.78 26.35c8.18 3.94 12.73 10.45 13.92 19.92.94 7.49 11.27 19 23.1 19 8.28 0 17.78-5.64 19.36-15.1.42-2.53 1.5-7.94 2.63-13.48l-.47.22.47-.22 4.83-2.29c11.21-5.27 17.98-8.45 17.98-19 0-11.86-15.77-19.43-26.64-19.43-7.88 0-13.86 2.24-18.67 4-3.4 1.27-6.34 2.37-9.1 2.37-4.71 0-5.18-.25-6.71-1.07l-3.52-1.71c-3.71-1.56-34.54-16.26-52.66-24.93.25-.76.46-1.51.63-2.25 12.41-6.28 62.8-31.81 63-31.91 5.34-2.49 8.64-2.34 10.83-2.24l1.26.04c2.06 0 5.56 1.7 8.94 3.35 4.88 2.38 10.42 5.08 16.1 5.08 9.1 0 15.38-6.94 15.38-16.88v-10.16c0-5.52-3.81-13.21-10.9-17.51-.39-6.56-1.77-12.71-5.82-16.89-2.93-3-6.79-4.55-11.48-4.55-11.1 0-19.69 6.48-24.1 12.54l-1.74 2.49c-3.35 4.85-9.57 13.88-16.34 17.36-4.87 2.51-19.21 9.18-31.45 14.82 7.95-5.8 14.75-13.59 14.75-27.7 0-8.82-1.51-17.6-2.67-23l1.9-2.82c7.61-10.99 18-26 18-42.93 0-10.39-10.9-19.83-25.98-32.9l-3.55-3.08-9.4-8.43c-18.2-16.54-35.3-32.2-68.78-32.2-15.72 0-31.3 4-47.59 12.28-8.11 4.11-14.65 10.54-22.2 17.98-3.11 3.05-6.32 6.21-9.96 9.53l-4.75 4.32c-14.36 13-24.74 22.4-24.74 32.48 0 16.89 10.42 31.94 18 42.93l1.35 2c-1.08 7.73-2.2 17.94-2.2 25.1 0 9.85 4.54 16.79 10.47 22.2-9.49-4.41-18.58-8.68-22.28-10.58-6.77-3.48-12.99-12.51-16.34-17.36l-1.74-2.49c-4.41-6.1-13.1-12.54-24.1-12.54-4.69 0-8.56 1.53-11.48 4.55-4.05 4.18-5.44 10.33-5.82 16.9.02-.0010.04-.02.07-.04-.02.0010-.04.02-.07.04-7.09 4.3-10.91 11.99-10.91 17.51v10.16c0 9.94 6.33 16.88 15.39 16.88 5.71 0 11.24-2.7 16.1-5.08 3.38-1.65 6.87-3.35 8.94-3.35l1.26-.04c2.19-.1 5.49-.26 10.83 2.24.19.09 40.2 20.38 57.73 29.2m120.8 14.4c10.77 5.15 48.79 23.32 53.2 25.2l2.6 1.27c3.08 1.67 5 2.35 11.73 2.35 4.66 0 8.8-1.55 12.8-3.04 4.42-1.65 9-3.36 14.97-3.36 7.1 0 16.1 4.97 16.1 8.87 0 3.16-.38 3.95-9.56 8.33.46-2.18.75-3.59.77-3.64.6-2.85-1.22-5.65-4.08-6.26-2.85-.6-5.65 1.22-6.25 4.07-.21.98-5.08 24.1-6.16 30.53-.63 3.75-5.13 6.26-8.94 6.26-6.2 0-12.25-7.11-12.59-9.79-2.05-16.36-11.91-24.32-19.82-28.1l-51-24.53c2.45-2.66 4.55-5.4 6.29-8.1m-13.8-73.1c17.6 0 25-22.1 25-27.79s-4.5-8.1-7.15-8.1h-33.48c-3.57 0-12.17 2.91-12.17 8.47 0 2.08 1.56 6.66 4.92 11.1 5.8 7.68 10.83 16.28 22.87 16.28m-87.49.04c12 0 17.1-8.6 22.87-16.28 3.36-4.45 4.92-9 4.92-11.1 0-5.56-8.6-8.47-12.17-8.47h-33.48c-2.65 0-7.14 2.38-7.14 8.1 0 5.69 7.41 27.79 25 27.79m-9.1 21.76h-7.84c3.76 1.73 6.61 3 7.84 3.59v-3.59m-10.4 36.7c.25 2.14.86 4.46 1.81 6.88z\"/> </svg>",
+ "excl": "<svg role=\"img\" aria-label=\"symbol ostrzegawczy\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 5790 5790\"><path d=\"m253 2897 2640 2640 2641-2640c-880-880-1760-1762-2640-2640L253 2897\" fill=\"#fff\"/><path d=\"m60 2897 2833 2833 2834-2834L2894 63 60 2897zm5218 0L2893 5280 510 2896 2894 512l2384 2384\" fill=\"red\"/><path d=\"M2892 1428h-20a475 475 0 0 0-301 121 229 229 0 0 0-64 113c-3 11-3 14-3 35s0 25 3 37c2 14 195 1314 197 1336a213 213 0 0 0 239 182 213 213 0 0 0 180-182c3-27 195-1324 198-1337 2-12 2-16 2-35 0-23 0-31-5-47a234 234 0 0 0-106-138 496 496 0 0 0-291-85h-30zm20 2011h-12a302 302 0 0 0-243 141 338 338 0 0 0-55 232 343 343 0 0 0 114 218 310 310 0 0 0 199 74 316 316 0 0 0 258-141 341 341 0 0 0 54-234 390 390 0 0 0-32-110 317 317 0 0 0-281-180\"/></svg>",
+ "corr": "<svg role=\"img\" aria-label=\"symbol ostrzegawczy\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 735 735\"> <path d=\"m367.5 727.4l360-360-360-360-360 360z\" fill=\"#f00\"/> <path d=\"m367.5 670.3-302.8-302.8l302.8-302.8 302.8 302.8z\" fill=\"#fff\"/> <path d=\"m233.3 384.1c-11.1 0-17.9-3.85-21.1-10.13h-79.98v36.56h199.3v-36.56h-72.5c-4.93 6.32-14.54 10.13-25.76 10.13\"/><path d=\"m251.7 370.5c3.25 0 7.91-1.57 11.67-9.1.86-1.71 1.03-3.89 1.22-6.2.1-1.2.26-3.13.54-3.87.36-.25 1.19-.61 1.78-.87 2.21-.97 5.24-2.29 6.83-5.47.89-1.78 1.15-3.54 1.15-5.22 0-1.26-.15-2.47-.29-3.62-.15-1.21-.28-2.37-.28-3.57 0-.41.001-.82.05-1.24.18-2.1 3.87-6.65 7.19-9.58l-5.07-5.77c-1.54 1.35-9.23 8.4-9.78 14.69-.21 2.47.04 4.56.26 6.4.26 2.19.39 3.48-.11 4.48-.35.69-1.77 1.32-3.04 1.87-1.96.86-4.17 1.82-5.4 4.07-1.08 1.99-1.29 4.58-1.5 7.09-.09 1.15-.23 2.9-.45 3.42-.66 1.31-1.35 2.37-2.06 3.16-.48 1.32-1.31 3.21-2.73 5.25v4.08\"/><path d=\"m241.7 365.7l4.39 6.3c2.51-1.75 4.31-3.73 5.61-5.59 1.42-2.03 2.24-3.92 2.73-5.25.18-.5.32-.92.42-1.23.69-2.15.18-4.19-.27-5.98-.47-1.88-.74-3.09-.22-4.23.6-1.34 1.62-2.14 2.91-3.15 1.47-1.15 3.3-2.59 4.44-5 1.42-2.98.59-6.27-.21-9.44-.56-2.23-1.14-4.54-.83-6.3l-7.56-1.34c-.15.82-.21 1.63-.21 2.44 0 2.51.6 4.91 1.16 7.09.31 1.23.76 3 .76 3.9 0 .16-.001.29-.04.39-.34.72-1.04 1.29-2.24 2.24-1.69 1.33-3.79 2.98-5.16 6-.71 1.58-.95 3.11-.95 4.51 0 1.84.41 3.47.73 4.74.15.6.37 1.48.38 1.84-.79 2.42-2.17 5.5-5.81 8\"/><path d=\"m208 350c.51.95.84 1.84 1.06 2.68.76.49 1.88 1.22 2.1 1.58.34.9.02 3.43-.2 5.11-.07.55-.14 1.08-.19 1.6 1.83 1.83 4.71 3.95 6.26 4.73l-2.89 5.79c1.43 2.04 3.1 4.08 4.62 5.75l5.68-5.17c-3.27-3.6-5.57-7.1-6.12-8.64-.001-.07-.001-.14-.001-.24 0-.67.16-1.95.28-2.84.19-1.51.4-3.12.4-4.71 0-1.44-.17-2.87-.67-4.18-1.01-2.64-3.38-4.15-5.27-5.36-1.12-.71-2.65-1.69-2.73-2.31-.02-.16-.03-.31-.03-.47 0-.77.24-1.56.67-2.9.63-1.95 1.46-4.53 1.46-8.3 0-.51-.02-1.04-.05-1.59l-7.67.46c.19 3.2-.42 5.08-1.06 7.1-.6 1.87-1.29 4-.96 6.67.02.13.04.25.06.38 1.78.94 3.86 2.29 5.25 4.87\"/><path d=\"m191.8 334.1c.13 1.5-.11 2.56-.38 3.8-.47 2.11-1.05 4.73.69 8.19 1.55 3.09 4.21 4.42 6.15 5.38 1.57.78 2.48 1.27 2.99 2.19.63 1.16.56 1.96.44 3.29-.14 1.62-.34 3.85 1.07 6.25 2.3 3.92 8.29 8.11 10.84 9.38l.54-1.08 2.89-5.79c-1.56-.78-4.44-2.89-6.26-4.73-.61-.61-1.1-1.19-1.39-1.68-.14-.23-.15-.52-.04-1.67.11-1.24.25-2.94-.28-4.94-.22-.84-.55-1.74-1.06-2.68-1.4-2.58-3.47-3.93-5.26-4.87-.37-.19-.73-.38-1.07-.55-1.64-.81-2.34-1.21-2.7-1.94-.5-1-.44-1.39-.06-3.1.32-1.46.77-3.45.54-6.12-.44-5.07-4.36-9.32-7.52-12.73l-2.33-2.61-5.94 4.86 2.63 2.96c2.36 2.55 5.29 5.73 5.51 8.18\"/><path d=\"m225.8 339.3c0 5.9 1.42 13.83 8.34 13.83 6.91 0 8.74-8.94 8.74-12.6 0-3.23-4.91-16.91-6.1-29.3-1.53-.02-2.81-.46-3.88-1.16-1.07 13.9-7.15 23.86-7.15 29.2\"/><path d=\"m334.1 227.5c-15.1 2.4-84.1 14.8-90.7 16.1-9.81 1.88-12.1-7-16.56-9.12 0 0 6.61 38.83 7 41.72 1.38 10.38-5.72 15.72-5.72 23.48 0 2.81 1.22 8 4.79 10.35 1.07.7 2.35 1.13 3.88 1.16.05 0 .09 0 .14 0 6.72 0 8.16-6.72 8.16-11.84 0-7.92-3.84-12.48-3.84-14.4s1.6-4.16 7.68-5.12c6.08-.96 82.1-14.16 94.1-16.1s20.88-11.76 18.96-21.84c-1.92-10.1-12.72-16.8-27.84-14.4m5.2 28.32c-10.24.64-99.7 9.28-99.7 9.28l-1.92-12.64s88.5-15.36 98.9-17.1c10.4-1.76 17.76 2.4 17.76 8.96 0 6.56-4.8 10.88-15 11.52\"/><path d=\"m498.8 306.2c-2.07 10.68-6.52 20.93-6.52 23.74 0 3.66 1.09 12.8 8 12.8s9.1-8.13 9.1-14c0-4.66-4.08-12.2-5.79-23.1-1 .44-2.14.7-3.45.7-.47 0-.9-.05-1.32-.13\"/><path d=\"m387.7 261.5c12 1.92 96.1 15.93 102.2 16.9 3.47.55 6.31 2.84 6.31 3.79s-3.71 4.5-3.71 10.73c0 4.76.74 12.26 6.26 13.29.41.08.85.13 1.32.13 1.31 0 2.45-.25 3.45-.7 4.14-1.83 5.78-6.99 5.78-11.69 0-10.97-5.7-8.81-4.33-19.2.38-2.88 5.92-40.54 5.92-40.54-4.48 2.08-5.67 9.82-15.48 7.94-6.67-1.28-83.8-15.51-98.9-17.91s-25.36 5.46-27.3 15.54 6.48 19.79 18.48 21.71m9-29.75c10.41 1.71 104.1 18.1 104.1 18.1l-1.92 12.64s-96.9-8.48-107.1-9.12c-10.24-.64-14.88-4.16-14.88-10.72s8.16-12.8 19.84-10.88\"/><path d=\"m532.7 318.2c.05 1.08.08 1.67-.51 3-1.12 2.48-3.07 5.57-6 6.27l1.75 7.48c3.33-.78 7.99-3.25 11.3-10.6 1.36-3 1.25-5.1 1.18-6.54-.06-1.2-.09-1.7.93-3.31.73-1.14.93-1.19 1.8-1.42 1.97-.52 4.23-1.37 6.18-5 2.22-4.14 1.5-7.58.98-10.1-.28-1.38-.51-2.46-.33-3.59.27-1.72 1.48-3.04 3.79-5.41 1.25-1.29 2.67-2.75 4.11-4.58l-6-4.75c-1.18 1.51-2.4 2.76-3.58 3.97-2.56 2.63-5.2 5.35-5.87 9.56-.4 2.51.04 4.64.4 6.35.46 2.24.63 3.29-.23 4.9-.52.98-.54.98-1.36 1.2-1.93.51-4.18 1.33-6.34 4.74-2.15 3.39-2.23 5.63-2.12 7.81\"/><path d=\"m519.6 331.2c3.68-3.24 4.82-4.41 6.5-9.81 1.09-3.51.84-5.83.64-7.69-.16-1.48-.27-2.55.23-4.46.26-.98.35-1.02 1.42-1.6 1.64-.88 4.38-2.35 5.59-7.11 1.11-4.37-.15-7.12-1.07-9.13-.72-1.56-1.15-2.51-.77-4.56l-7.56-1.38c-.8 4.43.44 7.15 1.35 9.13.72 1.57 1.05 2.29.61 4-.38 1.49-.65 1.63-1.78 2.24-1.53.82-4.1 2.2-5.22 6.39-.88 3.29-.64 5.49-.45 7.26.17 1.56.28 2.6-.34 4.58-1.11 3.57-1.23 3.68-4.24 6.32l-1.79 1.59 5.14 5.71 1.72-1.53\"/><path d=\"m462.7 305.6c.87 3.85 3.61 5.54 5.61 6.78 1.82 1.13 2.44 1.59 2.69 2.8.4 1.88.22 2.42-.05 3.22-.54 1.6-.95 3.28-.13 6.18 1.44 5.1 2.98 6.76 8.1 11.87l5.43-5.43c-4.85-4.85-5.25-5.41-6.15-8.55-.24-.84-.22-.9.02-1.63.56-1.68 1.05-3.63.28-7.26-.96-4.52-4.1-6.45-6.17-7.73-1.57-.97-2-1.32-2.15-1.93-.27-1.22.02-2.15.67-3.98.78-2.22 1.76-4.98 1.3-8.93l-7.63.9c.26 2.17-.26 3.63-.91 5.47-.75 2.13-1.69 4.8-.92 8.23\"/><path d=\"m457.5 303.6c0-1.37-.21-2.96-.85-4.86-1.78-5.23-3.63-7.25-5.77-9.58l-2.15-2.44-5.91 4.9 2.41 2.73c1.93 2.1 2.9 3.16 4.16 6.86.66 1.95.46 2.97.17 4.51-.38 1.98-.91 4.69.79 8.52 1.88 4.22 4.69 5.26 6.56 5.95 1.24.46 1.46.54 1.9 1.47.74 1.6.65 2.06.47 2.89-.23 1.1-.62 2.94.45 5.35 1.37 3.12 5.24 10.48 11.51 11.4l1.12-7.6c-1.54-.23-4-3.25-5.6-6.89l-.06-.18.1-.51c.16-.76.3-1.57.3-2.49 0-1.39-.31-3.04-1.31-5.21-1.77-3.81-4.44-4.8-6.21-5.45-1.32-.49-1.63-.6-2.19-1.86-.38-.86-.52-1.47-.52-2.09 0-.55.11-1.1.25-1.85.19-.99.42-2.16.42-3.58\"/><path d=\"m507.7 348.4c-7.53 6.09-24.39 6.56-33.3-1.56l-1.88-1.71-2.31 1.07c-3.43 1.59-8 1.72-11.67 1.82-4.67.13-8.36.24-10.25 3.19-1.37 2.14-1.24 5.1.37 7.99.26.48.57.96.91 1.44h16.75c-6.23 0-9.5-2.94-10.71-4.8.98-.07 2.15-.12 3.15-.14 3.68-.11 8.11-.31 12.31-1.69 4.58 3.49 10.17 5.49 15.87 6.25 4.13-4.86 11.1-6.64 15.18-6.64v5.75c3.18-.83 6.11-2.06 8.56-3.65 4.08 1.76 9.8 5.23 13.78 7.64 3.46 2.1 5.17 3.13 6.31 3.56 3.48 1.34 18 2.53 26.99 2.53v-7.68c-10.16 0-22.32-1.34-24.2-2.02-.61-.25-3.09-1.75-5.07-2.96-5.17-3.14-12.25-7.44-17.1-9.1l-1.99-.66-1.63 1.32\"/><path d=\"m466.3 360.6h-28.65c-12.9 0-14.28 7.9-14.28 10.67 0 .77.09 1.75.36 2.8h11.64c-3.42 0-4.51-1.34-4.51-2.77s1.31-3 6.79-3h45.99c.25-3.12 1.36-5.66 2.96-7.68h-20.3\"/><path d=\"m491.4 368.3h1.1l22.96-5.36-13.1-2.32h-.24v.66c-.1 0-9.61.43-10.73 7\"/><path d=\"m419.3 374.1c-7.4 0-12.38 5.81-12.38 11.24 0 5.18 4.6 11.43 12.76 11.43h2.39c.55-2.95 2.9-7.15 11.65-7.63v-.05h-14c-2.88 0-5-2.82-5.08-3.76 0-1 1.4-3.55 4.7-3.55h49.89v-7.68h-49.89\"/><path d=\"m422 396.7c-.12.63-.15 1.19-.15 1.66 0 6.3 5.55 11.43 15 11.43h.18c1.44-4.26 6.69-7.26 13.67-7.64v-.05h-13.85c-4.76 0-7.36-2.48-7.36-3.75 0-1.09 2.94-1.66 5.84-1.66h33.77v-7.68h-33.77c-.6 0-1.16.02-1.71.05-8.75.48-11.1 4.68-11.65 7.63\"/><path d=\"m437.1 409.8c-.26.77-.41 1.58-.41 2.42 0 4.82 4.32 10 13.96 10.85 6.98.58 37.1 1.53 42.62 1.53 4.5 0 23.36-.61 33.52-3.57 3-.88 5.55-2.06 8-3.2 5.28-2.46 10.74-5 22.6-5v-7.68c-13.57 0-20.1 3.04-25.84 5.71-2.29 1.06-4.45 2.07-6.91 2.79-8.53 2.49-25.98 3.26-31.37 3.26-5.1 0-35.2-.94-41.99-1.5-4.88-.41-6.91-2.28-6.91-3.19.17-.47 2.52-2.42 7.92-2.42h30.92l-7.4-7.68h-23.52c-.51 0-1.02.02-1.52.05-6.99.38-12.23 3.37-13.67 7.63\"/><path d=\"m486.9 360.2c-.11.13-.22.25-.32.38-1.6 2.02-2.71 4.56-2.96 7.68-.03.43-.06.86-.06 1.31 0 7.14 3.76 19.6 28.96 22.79l.96-7.62c-8.31-1.05-22.2-4.42-22.2-15.17 0-.46.04-.9.11-1.31 1.13-6.59 10.63-7 10.73-7v-7.68c-4.07 0-11.1 1.78-15.18 6.63\"/></svg>",
+ "env": "<svg role=\"img\" aria-label=\"symbol ostrzegawczy\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 735 735\"> <path d=\"m367.5 727.4l360-360-360-360-360 360z\" fill=\"#f00\"/> <path d=\"m367.5 670.3-302.8-302.8l302.8-302.8 302.8 302.8z\" fill=\"#fff\"/> <g stroke=\"#000\" stroke-width=\"5\"> <path d=\"m223.7 367.2h281.2\"/> <path stroke-width=\"4\" d=\"m462.7 418 32.98 23.79-31.36 15.1 42.2 3.79-11.36 15.1h23.3l.54 16.76-294.2-1.605s49.2-14.58 57.3-8.635c10.82-4.87 89.8-38.4 89.8-36.2m-75.72-25.98 1.62-85.4-42.72-23.2s-6.49-4.33-15.68-1.62c-3.25 1.08-7.57 2.16-7.57 2.16s23.3-19.47 27.58-17.84c4.33 1.62 34.61 16.22 34.61 16.22s-3.25-22.71-11.36-29.2-39.47-31.36-39.47-31.36v-5.95l42.72 25.96s1.62-24.87-7-39.47c-8.65-14.6-15.1-27.58-15.1-27.58l2.7-2.16 21.1 32.44 7-22.2 4.33-1.08s-5.41 31.36-1.62 41.1c3.79 9.73 17.84 62.73 17.84 62.73l21.1-30.3s.54-12.44-.54-21.1c-1.08-8.65-2.7-48.67-2.7-48.67h3.79l5.95 43.8 34.1-39.47v4.33s-33.51 42.2-31.89 51.4c1.62 9.19 3.24 14.6-2.7 27.58s-9.73 22.2-9.73 22.2 17.84-21.1 25.96-22.71c8.11-.54 18.91.54 26.48-5.95s25.96-27 25.96-27l-28.66 44.3s-13.51.54-18.91 6.49c-5.41 5.95-27.58 31.36-27.58 31.36v58.4l36.76 18.38-44.87 6.49-10.82 15.68-14.6-12.44-40.62 3.735z\"/> <path fill=\"#fff\" d=\"m355.2 445.1c10.29-4.29 27-11.36 36.76-25.42 10.1-14.54 45.96-75.7 95.2-70.8-2.7 6.49-11.36 20.55-11.36 20.55l35.1-10.82s.54 46.5-65.97 76.2c-30.82 10.82-37.3 11.36-40 15.1-2.7 3.79-15.1 22.71-15.1 22.71l-55.14-24.3s14.06-.515 20.51-3.215z\"/> </g> <ellipse cy=\"385.8\" cx=\"484.3\" rx=\"5.95\" ry=\"5.13\"/> </svg>"
+};
+function hazardSVG(key){ return GHS_SVG[key]; }
+
+/* =========================================================
+   TYPY PYTAŃ
+   ========================================================= */
+function lockAll(wrap){ wrap.querySelectorAll('button,input').forEach(b=>b.disabled=true); }
+
+// Jedna poprawna odpowiedź. opt: {text|html, correct}
+function renderOptions(container, options, onAnswer, oneCol){
+  const wrap=document.createElement('div');
+  wrap.className='options'+(oneCol?' one-col':'');
+  options.forEach(opt=>{
+    const btn=document.createElement('button');
+    btn.className='opt-btn';
+    if(opt.html) btn.innerHTML=opt.html; else btn.textContent=opt.text;
+    btn.onclick=()=>{
+      lockAll(wrap);
+      btn.classList.add(opt.correct?'correct':'wrong');
+      if(!opt.correct) wrap.children[options.findIndex(o=>o.correct)].classList.add('correct');
+      onAnswer(opt.correct);
+    };
+    wrap.appendChild(btn);
+  });
+  container.appendChild(wrap);
+}
+
+// Kilka poprawnych odpowiedzi – trzeba zaznaczyć wszystkie i tylko je
+function renderMulti(container, options, onAnswer){
+  const wrap=document.createElement('div'); wrap.className='options';
+  const chosen=new Set();
+  options.forEach((opt,i)=>{
+    const btn=document.createElement('button');
+    btn.className='opt-btn'; btn.textContent=opt.text;
+    btn.onclick=()=>{ chosen.has(i)?chosen.delete(i):chosen.add(i); btn.classList.toggle('selected'); };
+    wrap.appendChild(btn);
+  });
+  container.appendChild(wrap);
+  const row=document.createElement('div'); row.className='center-row';
+  const check=document.createElement('button'); check.className='check-btn'; check.textContent='Sprawdź';
+  row.appendChild(check); container.appendChild(row);
+  check.onclick=()=>{
+    if(chosen.size===0) return;
+    lockAll(wrap); check.disabled=true;
+    let ok=true;
+    options.forEach((opt,i)=>{
+      const b=wrap.children[i]; b.classList.remove('selected');
+      if(chosen.has(i)&&opt.correct) b.classList.add('correct');
+      else if(chosen.has(i)&&!opt.correct){ b.classList.add('wrong'); ok=false; }
+      else if(!chosen.has(i)&&opt.correct){ b.classList.add('correct','missed'); ok=false; }
+    });
+    onAnswer(ok);
+  };
+}
+
+// Przyporządkuj każdy element do jednej z kategorii. items: [{text, cat}]
+function renderSort(container, cats, items, onAnswer){
+  const list=document.createElement('div'); list.className='sort-list';
+  const picked=new Array(items.length).fill(null);
+  items.forEach((it,i)=>{
+    const row=document.createElement('div'); row.className='sort-row';
+    row.innerHTML=`<span class="sort-item">${it.text}</span><span class="sort-cats"></span>`;
+    const catsWrap=row.querySelector('.sort-cats');
+    cats.forEach((c,ci)=>{
+      const b=document.createElement('button'); b.className='cat-btn'; b.textContent=c;
+      b.onclick=()=>{ picked[i]=ci; [...catsWrap.children].forEach(x=>x.classList.remove('selected')); b.classList.add('selected'); updateCheck(); };
+      catsWrap.appendChild(b);
+    });
+    list.appendChild(row);
+  });
+  container.appendChild(list);
+  const r=document.createElement('div'); r.className='center-row';
+  const check=document.createElement('button'); check.className='check-btn'; check.textContent='Sprawdź'; check.disabled=true;
+  r.appendChild(check); container.appendChild(r);
+  function updateCheck(){ check.disabled = picked.some(p=>p===null); }
+  check.onclick=()=>{
+    lockAll(list); check.disabled=true;
+    let ok=true;
+    items.forEach((it,i)=>{
+      const row=list.children[i];
+      const good = picked[i]===it.cat;
+      row.classList.add(good?'correct':'wrong');
+      if(!good){ ok=false; row.querySelectorAll('.cat-btn')[it.cat].classList.add('should'); }
+    });
+    onAnswer(ok);
+  };
+}
+
+// Ułóż w kolejności. steps: tablica w poprawnej kolejności
+function renderOrder(container, steps, onAnswer){
+  const order=[];
+  const shuffled=shuffle(steps.map((t,i)=>({t,i})));
+  const wrap=document.createElement('div'); wrap.className='options one-col';
+  shuffled.forEach(s=>{
+    const b=document.createElement('button'); b.className='opt-btn order-btn';
+    b.innerHTML=`<span class="badge"></span>${s.t}`;
+    b.onclick=()=>{
+      if(b.classList.contains('selected')) return;
+      order.push(s.i); b.classList.add('selected'); b.querySelector('.badge').textContent=order.length;
+      check.disabled = order.length!==steps.length;
+    };
+    wrap.appendChild(b);
+  });
+  container.appendChild(wrap);
+  const r=document.createElement('div'); r.className='center-row';
+  const reset=document.createElement('button'); reset.className='ghost-btn'; reset.textContent='↺ Od nowa';
+  const check=document.createElement('button'); check.className='check-btn'; check.textContent='Sprawdź'; check.disabled=true;
+  r.append(reset,check); container.appendChild(r);
+  reset.onclick=()=>{ order.length=0; check.disabled=true; [...wrap.children].forEach(b=>{ b.classList.remove('selected'); b.querySelector('.badge').textContent=''; }); };
+  check.onclick=()=>{
+    lockAll(wrap); check.disabled=true; reset.disabled=true;
+    let ok=true;
+    shuffled.forEach((s,k)=>{
+      const b=wrap.children[k];
+      const pos=order.indexOf(s.i);
+      b.classList.remove('selected');
+      if(pos===s.i) b.classList.add('correct'); else { b.classList.add('wrong'); ok=false; }
+      b.querySelector('.badge').textContent = pos===s.i ? pos+1 : `${pos+1}→${s.i+1}`;
+      b.querySelector('.badge').style.width = pos===s.i ? '' : 'auto';
+      b.querySelector('.badge').style.padding = pos===s.i ? '' : '0 6px';
+      b.querySelector('.badge').style.borderRadius = '13px';
+    });
+    onAnswer(ok);
+  };
+}
+
+// Wpisywana odpowiedź. accepted: tablica dopuszczalnych odpowiedzi
+function renderInput(container, accepted, onAnswer, placeholder){
+  const row=document.createElement('div'); row.className='input-row';
+  row.innerHTML=`<input type="text" class="answer-input" placeholder="${placeholder||'odpowiedź'}" autocomplete="off" autocapitalize="off" spellcheck="false"/><button class="check-btn">Sprawdź</button>`;
+  container.appendChild(row);
+  const input=row.querySelector('input'), btn=row.querySelector('button');
+  const norm=s=>s.trim().toLowerCase().replace(/razy/g,'').replace(/[×x*]/g,'').replace(/[\s.,!]/g,'');
+  const submit=()=>{
+    if(input.disabled||!input.value.trim()) return;
+    const ok=accepted.some(a=>norm(a)===norm(input.value));
+    input.disabled=true; btn.disabled=true;
+    input.classList.add(ok?'correct':'wrong');
+    if(!ok) input.value += `  ➜ ${accepted[0]}`;
+    onAnswer(ok);
+  };
+  btn.onclick=submit;
+  input.addEventListener('keydown',e=>{ if(e.key==='Enter') submit(); });
+  input.focus();
+}
+
+function intro(container, html){ container.innerHTML = html; }
+const opts = (correct, ...wrong) => shuffle([{text:correct,correct:true}, ...wrong.map(t=>({text:t,correct:false}))]);
+
+/* =========================================================
+   PYTANIA
+   ========================================================= */
+const LESSONS = [
+  null,
+  'Co to jest przyroda?',
+  'Sposób na naukę',
+  'Ile czasu spędzam przed ekranem?',
+  'Badam przyrodę',
+  'Myślę i działam jak przyrodnik',
+  'Obserwuję przyrodę pod mikroskopem',
+  'Posługuję się kompasem'
+];
+const Q = [];
+
+/* ---------- Lekcja 1 ---------- */
+Q.push({ lesson:1,
+  hint:'Przyroda to wszystko, co nas otacza i co <b>nie zostało stworzone przez człowieka</b>, np. rośliny, zwierzęta, woda, skały, Słońce.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Czym jest przyroda?</p>`);
+    renderOptions(c, opts('wszystkim, co nas otacza i co nie zostało stworzone przez człowieka',
+      'tylko roślinami i zwierzętami',
+      'wszystkim, co zbudował człowiek',
+      'tylko tym, co rośnie w lesie'), a, true);
+  }
+});
+Q.push({ lesson:1,
+  hint:'Ożywione (organizmy): kot, motyl, drzewo, grzyb. Nieożywione: chmura, skała. Wytwory człowieka: dom, płot, rower.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Przyporządkuj każdy element do właściwej grupy.</p>`);
+    const cats=['ożywione','nieożywione','stworzył człowiek'];
+    renderSort(c, cats, shuffle([
+      {text:'🐱 kot',cat:0},{text:'🏠 dom',cat:2},{text:'🦋 motyl',cat:0},{text:'🚧 płot',cat:2},{text:'🚲 rower',cat:2},
+      {text:'🌳 drzewo',cat:0},{text:'🍄 grzyb',cat:0},{text:'☁️ chmura',cat:1},{text:'🪨 skała',cat:1}
+    ]), a);
+  }
+});
+Q.push({ lesson:1,
+  hint:'Woda to element <b>nieożywiony</b> – nie oddycha, nie rośnie, nie rozmnaża się. Sama się nie porusza: to wiatr wprawia ją w ruch.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">W czasie sztormu Magda obserwowała groźne, wzburzone morze. Ogromne fale mocno uderzały o brzeg. O czym to świadczy?</p>`);
+    renderOptions(c, opts('Woda jest nieożywionym składnikiem przyrody, ponieważ to wiatr wprawia ją w ruch.',
+      'Woda jest ożywionym składnikiem przyrody, ponieważ się porusza.',
+      'Woda jest nieożywionym składnikiem przyrody, ponieważ się porusza.',
+      'Woda jest ożywionym składnikiem przyrody, ponieważ gniewa się jak ludzie.'), a, true);
+  }
+});
+Q.push({ lesson:1,
+  hint:'Organizmy <b>wykonują czynności życiowe</b>: oddychają, odżywiają się, wydalają, rozmnażają się, rosną i rozwijają się, potrafią się samodzielnie poruszać.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Czym elementy ożywione (organizmy) różnią się od nieożywionych?</p>`);
+    renderOptions(c, opts('Wykonują czynności życiowe, np. oddychają i rosną.',
+      'Są zawsze zielone.',
+      'Zawsze są większe od elementów nieożywionych.',
+      'Nigdy się nie poruszają.'), a, true);
+  }
+});
+Q.push({ lesson:1,
+  hint:'Przyrodę możesz poznawać dzięki obserwacjom i doświadczeniom, z książek i atlasów, z filmów i artykułów, od nauczycieli i naukowców, a także w zoo, ogrodach botanicznych i parkach narodowych. Gra komputerowa nie jest źródłem wiedzy o przyrodzie.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Zaznacz <u>wszystkie</u> źródła wiedzy o przyrodzie wymienione w podręczniku.</p>`);
+    renderMulti(c, shuffle([
+      {text:'obserwacje przyrodnicze',correct:true},{text:'atlasy i albumy',correct:true},
+      {text:'ogród botaniczny',correct:true},{text:'park narodowy',correct:true},
+      {text:'gra komputerowa o wyścigach',correct:false},{text:'reklama w telewizji',correct:false}
+    ]), a);
+  }
+});
+Q.push({ lesson:1,
+  hint:'Oceanograf bada morza i oceany. Leśnik dba o lasy, rolnik produkuje żywność, a astronauta bada kosmos.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Kto bada morza i oceany?</p>`);
+    renderOptions(c, opts('oceanograf','leśnik','astronauta','rolnik'), a);
+  }
+});
+
+/* ---------- Lekcja 2 ---------- */
+Q.push({ lesson:2,
+  hint:'Skupić się pomagają: sen, krótkie przerwy, wyłączone rozpraszacze, cisza i spokój, ruch na świeżym powietrzu i picie wody. Włączony telewizor, nauka przy filmie i bałagan rozpraszają.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Zaznacz <u>wszystko</u>, co <b>pomaga</b> skupić się na nauce.</p>`);
+    renderMulti(c, shuffle([
+      {text:'wyspanie się',correct:true},{text:'krótka przerwa co 20–30 minut',correct:true},
+      {text:'wyłączony telefon',correct:true},{text:'picie wody',correct:true},
+      {text:'włączony telewizor',correct:false},{text:'nauka przy włączonym filmie',correct:false},
+      {text:'bałagan na biurku',correct:false},{text:'uczenie się bardzo późno w nocy',correct:false}
+    ]), a);
+  }
+});
+Q.push({ lesson:2,
+  hint:'Dzieci w Twoim wieku potrzebują <b>9–11 godzin</b> snu. Wyspany mózg uczy się szybciej.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Ile godzin snu potrzebują dzieci w Twoim wieku?</p>`);
+    renderOptions(c, opts('9–11 godzin','5–6 godzin','7 godzin','13–15 godzin'), a);
+  }
+});
+Q.push({ lesson:2,
+  hint:'Sprzyja nauce: jasno, porządek, na biurku tylko zeszyt i potrzebne przybory. Przeszkadza: ciemno, włączona gra, dużo porozkładanych rzeczy.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Wojtek i Filip odrabiają lekcje w swoich pokojach. Oceń każde zdanie: czy taki pokój sprzyja nauce, czy w niej przeszkadza?</p>`);
+    renderSort(c, ['sprzyja','przeszkadza'], shuffle([
+      {text:'W pokoju jest jasno.',cat:0},
+      {text:'W pokoju jest porządek.',cat:0},
+      {text:'W pokoju jest dość ciemno.',cat:1},
+      {text:'Na komputerze jest włączona gra.',cat:1},
+      {text:'Na biurku jest wiele porozkładanych rzeczy.',cat:1},
+      {text:'Na biurku są tylko zeszyt i niezbędne przybory.',cat:0}
+    ]), a);
+  }
+});
+Q.push({ lesson:2,
+  hint:'<b>Wielozadaniowość</b> to robienie kilku rzeczy jednocześnie, np. nauka przy włączonym filmie. Wtedy trudniej się skupić i nauka trwa dłużej.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Co to jest wielozadaniowość?</p>`);
+    renderOptions(c, opts('robienie kilku rzeczy jednocześnie','odrabianie wszystkich zadań domowych','robienie listy zadań','nauka w grupie'), a, true);
+  }
+});
+Q.push({ lesson:2,
+  hint:'Wieczorem i w pochmurne dni włączaj <b>lampę na suficie i lampkę na biurku</b>, czyli światło z góry i z boku. Dzięki temu nie zmęczysz oczu.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Jak powinno być oświetlone miejsce do nauki wieczorem?</p>`);
+    renderOptions(c, opts('światłem z góry i z boku (lampa na suficie i lampka na biurku)',
+      'tylko światłem z ekranu komputera',
+      'wystarczy mała lampka nocna',
+      'najlepiej uczyć się w półmroku'), a, true);
+  }
+});
+
+/* ---------- Lekcja 3 ---------- */
+Q.push({ lesson:3,
+  hint:'Uzależnienie od internetu polega na tym, że ciągle z niego korzystamy, <b>nawet jeśli wiemy, że to szkodzi</b> zdrowiu i relacjom z innymi.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Na czym polega uzależnienie od internetu?</p>`);
+    renderOptions(c, opts('Ciągle korzystamy z internetu, choć wiemy, że to nam szkodzi.',
+      'Raz dziennie sprawdzamy pogodę w telefonie.',
+      'Szukamy w internecie informacji do zadania domowego.',
+      'Oglądamy z rodziną film w weekend.'), a, true);
+  }
+});
+Q.push({ lesson:3,
+  hint:'Sygnały ostrzegawcze to m.in.: „zawsze online", „nic, tylko internet", złość na ograniczenia, najważniejsza opinia w sieci, lęk bez smartfona.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Zaznacz <u>wszystkie</u> sygnały ostrzegawcze, które mogą świadczyć o zbyt częstym korzystaniu z internetu.</p>`);
+    renderMulti(c, shuffle([
+      {text:'Złościsz się, gdy rodzice ograniczają Ci czas przed ekranem.',correct:true},
+      {text:'Bez smartfona pod ręką czujesz niepokój.',correct:true},
+      {text:'W nowym miejscu od razu pytasz o hasło do wi-fi.',correct:true},
+      {text:'Smucisz się, gdy masz mało polubień.',correct:true},
+      {text:'Chętnie grasz z kolegami w piłkę.',correct:false},
+      {text:'Czytasz książkę przed snem.',correct:false}
+    ]), a);
+  }
+});
+Q.push({ lesson:3,
+  hint:'Telefon odłóż <b>na godzinę przed zaśnięciem</b>, aby mózg odpoczął i przygotował się do snu.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Na ile czasu przed zaśnięciem warto odłożyć telefon?</p>`);
+    renderOptions(c, opts('na godzinę','na minutę','nie trzeba go odkładać','na 5 godzin'), a);
+  }
+});
+Q.push({ lesson:3,
+  hint:'Skutki nadmiernego korzystania z internetu: brak snu i energii, zmęczenie, rozdrażnienie, trudności ze skupieniem, słaba kondycja, zgarbiona sylwetka, trudności w kontaktach z ludźmi. Sposoby na mądre korzystanie: ograniczenie czasu, odkładanie telefonu przed snem, czas z ludźmi i na świeżym powietrzu.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Czy to <b>skutek</b> zbyt długiego korzystania z internetu, czy <b>sposób</b> na mądre korzystanie z niego?</p>`);
+    renderSort(c, ['skutek','mądry sposób'], shuffle([
+      {text:'słaba kondycja i zgarbiona sylwetka',cat:0},
+      {text:'trudności z zapamiętywaniem',cat:0},
+      {text:'płytki sen i mało energii rano',cat:0},
+      {text:'ustalenie, ile czasu spędzam w sieci',cat:1},
+      {text:'wyciszenie powiadomień na noc',cat:1},
+      {text:'spotkania z kolegami na żywo',cat:1}
+    ]), a);
+  }
+});
+
+/* ---------- Lekcja 4 ---------- */
+Q.push({ lesson:4,
+  hint:'Podczas <b>obserwacji</b> nie wpływamy na to, co obserwujemy – tylko patrzymy, słuchamy, wąchamy, dotykamy. Podczas <b>doświadczenia</b> coś zmieniamy i sprawdzamy, co się stanie.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Czym obserwacja różni się od doświadczenia?</p>`);
+    renderOptions(c, opts('W czasie obserwacji nie wpływamy na to, co badamy, a w czasie doświadczenia – wpływamy.',
+      'W czasie obserwacji wpływamy na to, co badamy, a w czasie doświadczenia – nie.',
+      'Obserwację robi się tylko w lesie, a doświadczenie tylko w szkole.',
+      'Niczym się nie różnią.'), a, true);
+  }
+});
+Q.push({ lesson:4,
+  hint:'Oko – wzrok, ucho – słuch, nos – węch, język – smak, skóra – dotyk.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Dopasuj narząd do zmysłu.</p>`);
+    renderSort(c, ['wzrok','słuch','węch','smak','dotyk'], shuffle([
+      {text:'👁️ oko',cat:0},{text:'👂 ucho',cat:1},{text:'👃 nos',cat:2},{text:'👅 język',cat:3},{text:'✋ skóra',cat:4}
+    ]), a);
+  }
+});
+Q.push({ lesson:4,
+  hint:'Skóra to narząd dotyku – pokrywa całe ciało, nie tylko głowę. Dzięki niej czujemy, czy coś jest miękkie, twarde, ciepłe, zimne, a także czujemy ból i ucisk.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Na zdjęciu dziewczynki z wystawionym językiem widać wszystkie pięć narządów zmysłów. Jeden z nich znajduje się nie tylko na głowie. Który to narząd?</p>`);
+    renderInput(c, ['skóra','skora'], a, 'nazwa narządu');
+  }
+});
+Q.push({ lesson:4,
+  hint:'Informacja trafia najpierw do <b>narządu zmysłu</b> (np. oka), potem do <b>mózgu</b>, który ją analizuje, a na końcu mózg wysyła sygnał np. do <b>mięśni</b>.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Widzisz i słyszysz miauczącego kota. Jaką drogę pokonuje ta informacja?</p>`);
+    renderOptions(c, opts('narząd zmysłu → mózg → mięśnie','mózg → narząd zmysłu → mięśnie','mięśnie → mózg → narząd zmysłu','mięśnie → narząd zmysłu → mózg'), a, true);
+  }
+});
+Q.push({ lesson:4,
+  hint:'Badania są <b>zaplanowane</b>, prowadzone <b>systematycznie</b> (powtarzamy je kilka razy) i <b>udokumentowane</b> (notatki, rysunki, zdjęcia).',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Które zdanie o badaniach przyrody jest prawdziwe?</p>`);
+    renderOptions(c, opts('Badania przyrody muszą być zaplanowane.',
+      'Badania przyrody muszą być wykonane przez różne osoby.',
+      'Badania przyrody mogą być przeprowadzone tylko jeden raz.',
+      'Badań przyrody nie trzeba zapisywać.'), a, true);
+  }
+});
+Q.push({ lesson:4,
+  hint:'Pająka z bliska obejrzysz przez <b>lupę</b> – powiększa trudne do zobaczenia szczegóły, np. włoski albo oczy owada.',
+  render(c,a){
+    intro(c,`<p class="q-instruction"><b>Róża:</b> „W malinach zauważyłam pająka. Chcę zobaczyć, czy na jego ciele są małe włoski jak u pszczoły. Sprawdzę też, jak jest zbudowana sieć." Jakiego przyrządu potrzebuje Róża?</p>`);
+    renderOptions(c, opts('🔍 lupy','🧭 kompasu','⚖️ wagi','🌡️ termometru'), a);
+  }
+});
+Q.push({ lesson:4,
+  hint:'W lesie bez oznakowanych szlaków pomoże <b>kompas</b> – wskazuje kierunek północny i pomaga orientować się w terenie.',
+  render(c,a){
+    intro(c,`<p class="q-instruction"><b>Wiktor:</b> „Wybieram się z mamą na wycieczkę rowerową do lasu. W tym lesie nie ma oznakowanych szlaków i łatwo się zgubić." Co powinien zabrać Wiktor?</p>`);
+    renderOptions(c, opts('🧭 kompas','🔬 mikroskop','🫙 zlewkę','📏 taśmę mierniczą'), a);
+  }
+});
+Q.push({ lesson:4,
+  hint:'Żeby sprawdzić, czy kotek nie chudnie, trzeba go regularnie <b>ważyć</b> – potrzebna jest waga.',
+  render(c,a){
+    intro(c,`<p class="q-instruction"><b>Ola:</b> „Jeden z moich kotków rośnie wolniej niż rodzeństwo. Muszę kontrolować, ile zjadł, i sprawdzać, czy nie chudnie." Jakiego przyrządu potrzebuje Ola?</p>`);
+    renderOptions(c, opts('⚖️ wagi','🔭 lornetki','🧭 kompasu','🔍 lupy'), a);
+  }
+});
+Q.push({ lesson:4,
+  hint:'Wilki polują nocą, dlatego mają <b>lepszy węch i słuch</b> niż człowiek. Za to ich wzrok w dzień jest słaby.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Wilki żyją w lesie i polują nocą. Które zmysły mają lepsze niż człowiek?</p>`);
+    renderOptions(c, opts('węch i słuch','wzrok i smak','tylko wzrok','dotyk i smak'), a);
+  }
+});
+
+/* ---------- Lekcja 5 ---------- */
+Q.push({ lesson:5,
+  hint:'Kolejność: 1) zadaj pytanie badawcze, 2) postaw hipotezę, 3) zaplanuj i przeprowadź doświadczenie, 4) zapisz obserwacje (wyniki), 5) wyciągnij wniosek.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Ułóż etapy doświadczenia we właściwej kolejności. Klikaj od pierwszego do ostatniego.</p>`);
+    renderOrder(c, ['Zadaj pytanie badawcze.','Postaw hipotezę.','Zaplanuj przebieg doświadczenia i je przeprowadź.','Zapisz obserwacje, czyli wyniki.','Wyciągnij wniosek.'], a);
+  }
+});
+Q.push({ lesson:5,
+  hint:'<b>Hipoteza</b> to prawdopodobna odpowiedź na pytanie badawcze. Jeszcze nie wiemy, czy jest prawdziwa – sprawdzi to doświadczenie.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Co to jest hipoteza?</p>`);
+    renderOptions(c, opts('prawdopodobna odpowiedź na pytanie badawcze',
+      'pytanie, na które szukamy odpowiedzi',
+      'zapis wyników doświadczenia',
+      'lista potrzebnych materiałów'), a, true);
+  }
+});
+Q.push({ lesson:5,
+  hint:'Piłeczka odbiła się od miękkiego podłoża <b>niżej</b> (ok. 10 cm) niż od twardego (ok. 36 cm). Hipoteza mówiła odwrotnie, więc została <b>obalona</b>.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Hipoteza: „Od miękkiego podłoża piłeczka odbija się wyżej niż od twardego".</p>
+      <div class="info-box"><b>Wyniki doświadczenia</b><br>Podłoże twarde (blat stołu): 37 cm, 36 cm, 37 cm, 35 cm<br>Podłoże miękkie (ręczniki papierowe): 10 cm, 11 cm, 9 cm, 10 cm</div>
+      <p class="q-instruction">Co możemy powiedzieć o hipotezie?</p>`);
+    renderOptions(c, opts('Hipoteza została obalona.','Hipoteza została potwierdzona.','Nie da się tego sprawdzić.','Trzeba zmienić pytanie badawcze.'), a);
+  }
+});
+Q.push({ lesson:5,
+  hint:'Próby w doświadczeniu mogą się różnić <b>tylko jednym czynnikiem</b> – tym, który badamy. Grządka w ogródku i wilgotna wata w piwnicy różnią się nie tylko światłem, ale też podłożem i temperaturą.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Dziewczynka chce zbadać wpływ światła na kiełkowanie nasion słonecznika. Połowę nasion wysieje na grządkę w ogródku, a drugą połowę na wilgotną watę w ciemnej piwnicy. Jaki błąd popełniła?</p>`);
+    renderOptions(c, opts('Próby różnią się nie tylko światłem, ale też podłożem i temperaturą.',
+      'Użyła za mało nasion.',
+      'Nie powinna badać słonecznika.',
+      'Nie popełniła żadnego błędu.'), a, true);
+  }
+});
+Q.push({ lesson:5,
+  hint:'Podczas doświadczeń <b>nie jemy, nie pijemy i niczego nie wąchamy</b>. Postępujemy zgodnie z opisem, słuchamy nauczyciela, używamy okularów i rękawiczek, a o każdym wypadku od razu mówimy nauczycielowi.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Które zachowanie podczas doświadczeń jest <b>poprawne</b>?</p>`);
+    renderOptions(c, opts('O każdym wypadku od razu mówię nauczycielowi.',
+      'Wącham substancje, żeby sprawdzić, co to jest.',
+      'Jem drugie śniadanie przy stanowisku z odczynnikami.',
+      'Robię doświadczenie po swojemu, bez czytania opisu.'), a, true);
+  }
+});
+Q.push({ lesson:5,
+  hint:'Płomień w czerwonym rombie oznacza substancję <b>łatwopalną</b>, czyli taką, która łatwo może się zapalić.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Co oznacza ten symbol na opakowaniu?</p><div class="figure">${hazardSVG('flame')}</div>`);
+    renderOptions(c, opts('substancja łatwopalna','substancja toksyczna','substancja szkodliwa dla środowiska','substancja drażniąca'), a);
+  }
+});
+Q.push({ lesson:5,
+  hint:'Czaszka ze skrzyżowanymi kośćmi oznacza substancję <b>toksyczną, czyli trującą</b>.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Który symbol oznacza substancję <b>toksyczną (trującą)</b>?</p>`);
+    renderOptions(c, shuffle(['skull','flame','excl','env'].map(k=>({html:hazardSVG(k), correct:k==='skull'}))), a);
+  }
+});
+Q.push({ lesson:5,
+  hint:'Płomień – łatwopalna. Ciecz wylewająca się na dłoń i powierzchnię – żrąca (parzy skórę, uszkadza oczy). Wykrzyknik – drażniąca. Czaszka – toksyczna (trująca). Martwe drzewo i ryba – szkodliwa dla środowiska.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Dopasuj każdy symbol do jego znaczenia.</p>`);
+    const cats=['łatwopalna','żrąca','drażniąca','toksyczna','szkodliwa dla środowiska'];
+    renderSort(c, cats, shuffle(['flame','corr','excl','skull','env'].map((k,i)=>({text:hazardSVG(k), cat:i}))), a);
+  }
+});
+Q.push({ lesson:5,
+  hint:'Karta charakterystyki opisuje m.in. nazwę i skład substancji, środki ostrożności, pierwszą pomoc i co robić, gdy substancja przedostanie się do środowiska. Niebezpieczne substancje to np. denaturat i woda wapienna.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Każda niebezpieczna substancja ma dokument, z którego dowiesz się, jak z nią bezpiecznie pracować i jak udzielić pomocy. Jak się on nazywa?</p>`);
+    renderOptions(c, opts('karta charakterystyki','karta obserwacji','paragon','instrukcja obsługi mikroskopu'), a);
+  }
+});
+
+/* ---------- Lekcja 6 ---------- */
+Q.push({ lesson:6,
+  hint:'Szkolny mikroskop optyczny powiększa obraz <b>od kilkudziesięciu do tysiąca razy</b>. Kilka milionów razy powiększają specjalne mikroskopy (elektronowe).',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Ile razy powiększają obraz mikroskopy optyczne używane w szkole?</p>`);
+    renderOptions(c, opts('od kilkudziesięciu do tysiąca razy','kilka razy','kilka milionów razy','dokładnie dwa razy'), a, true);
+  }
+});
+Q.push({ lesson:6,
+  hint:'Powiększenie mikroskopu = powiększenie obiektywu · powiększenie okularu. 15 · 10 = <b>150</b>.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Obiektyw ma powiększenie <b>15×</b>, a okular <b>10×</b>. Ile razy mikroskop powiększa obraz?</p>`);
+    renderInput(c, ['150'], a, 'liczba');
+  }
+});
+Q.push({ lesson:6,
+  hint:'40 · 10 = <b>400</b>. Właśnie przy takim powiększeniu widać pojedyncze komórki liścia brzozy.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Okular ma powiększenie <b>10×</b>, a obiektyw <b>40×</b>. Ile razy mikroskop powiększa obraz?</p>`);
+    renderInput(c, ['400'], a, 'liczba');
+  }
+});
+Q.push({ lesson:6,
+  hint:'Części optyczne: okular, obiektyw, źródło światła – powiększają i oświetlają obraz. Części mechaniczne: rewolwer, stolik, śruba makrometryczna i mikrometryczna – służą do ustawiania mikroskopu.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Podziel części mikroskopu na optyczne i mechaniczne.</p>`);
+    renderSort(c, ['optyczna','mechaniczna'], shuffle([
+      {text:'okular',cat:0},{text:'obiektyw',cat:0},{text:'źródło światła',cat:0},
+      {text:'stolik',cat:1},{text:'rewolwer',cat:1},{text:'śruba mikrometryczna',cat:1}
+    ]), a);
+  }
+});
+Q.push({ lesson:6,
+  hint:'Okular – powiększa obraz z obiektywu. Stolik – kładziemy na nim preparat. Rewolwer – pozwala zmienić obiektyw. Śruba makrometryczna – przybliżona ostrość, mikrometryczna – dokładna ostrość.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Dopasuj część mikroskopu do tego, do czego służy.</p>`);
+    renderSort(c, ['stolik','rewolwer','śruba mikrometryczna','okular'], shuffle([
+      {text:'Kładziemy na nim preparat.',cat:0},
+      {text:'Umożliwia zmianę obiektywu.',cat:1},
+      {text:'Pozwala ustawić dokładną ostrość.',cat:2},
+      {text:'Przez niego patrzymy; powiększa obraz z obiektywu.',cat:3}
+    ]), a);
+  }
+});
+Q.push({ lesson:6,
+  hint:'Najpierw ustawiamy obiektyw o <b>najmniejszym powiększeniu</b> – wtedy widzimy większy obszar i szybciej odszukamy obiekt.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Dlaczego obserwację mikroskopową zaczynamy od obiektywu o najmniejszym powiększeniu?</p>`);
+    renderOptions(c, opts('Dzięki temu szybciej odszukamy obiekt.',
+      'Bo wtedy preparat się nie nagrzeje.',
+      'Bo większe obiektywy są zepsute.',
+      'Bo tak jest ładniej.'), a, true);
+  }
+});
+Q.push({ lesson:6,
+  hint:'Preparat mikroskopowy to cienka próbka między dwoma szkiełkami. Musi być <b>bardzo cienki</b>, żeby przenikało przez niego światło.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Dlaczego preparaty mikroskopowe muszą być bardzo cienkie?</p>`);
+    renderOptions(c, opts('Żeby przenikało przez nie światło.','Żeby szybciej wyschły.','Żeby zmieściły się w pudełku.','Żeby były lżejsze.'), a, true);
+  }
+});
+Q.push({ lesson:6,
+  hint:'Jeden z małych organizmów żyjących w kałuży przypomina kształtem pantofel, dlatego nazywa się go <b>pantofelkiem</b>.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">W kałuży żyje mały organizm, który kształtem przypomina but. Jak się nazywa?</p>`);
+    renderInput(c, ['pantofelek'], a, 'nazwa');
+  }
+});
+Q.push({ lesson:6,
+  hint:'Liście pokrzywy pokrywają malutkie włoski wypełnione parzącą substancją. Gdy ich dotykamy, włoski się łamią, a substancja zaczyna parzyć.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Czego dowiedzieliśmy się dzięki mikroskopowi: dlaczego pokrzywa parzy?</p>`);
+    renderOptions(c, opts('Ma bardzo małe włoski wypełnione parzącą substancją.',
+      'Jest bardzo gorąca.',
+      'Ma ostre kolce jak róża.',
+      'Mieszkają na niej parzące owady.'), a, true);
+  }
+});
+
+/* ---------- Lekcja 7 ---------- */
+Q.push({ lesson:7,
+  hint:'Czerwony koniec igły magnetycznej zawsze wskazuje <b>północ</b> (N). Igła to mały magnes, który swobodnie się obraca.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Jaki kierunek zawsze wskazuje czerwony koniec igły magnetycznej kompasu?</p>`);
+    renderOptions(c, opts('północ','południe','wschód','zachód'), a);
+  }
+});
+Q.push({ lesson:7,
+  hint:'Kierunki główne: północ, południe, wschód, zachód. Kierunki pośrednie leżą pomiędzy nimi: północny wschód, północny zachód, południowy wschód, południowy zachód.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Podziel kierunki na główne i pośrednie.</p>`);
+    renderSort(c, ['główny','pośredni'], shuffle([
+      {text:'północ (N)',cat:0},{text:'zachód (W)',cat:0},{text:'południe (S)',cat:0},
+      {text:'północny wschód (NE)',cat:1},{text:'południowy zachód (SW)',cat:1},{text:'południowy wschód (SE)',cat:1}
+    ]), a);
+  }
+});
+(function(){
+  const pick = shuffle(['NE','SW','SE','NW','E','W'])[0];
+  const others = Object.keys(DIRS).filter(k=>k!==pick && k!=='N');
+  Q.push({ lesson:7,
+    hint:`Północ (N) jest na górze. Zgodnie z ruchem wskazówek zegara: N, NE, E, SE, S, SW, W, NW. Zaznaczony kierunek to <b>${DIRS[pick].name} (${pick})</b>.`,
+    render(c,a){
+      intro(c,`<p class="q-instruction">Jaki kierunek wskazuje czerwona strzałka na róży kierunków?</p><div class="figure">${compassRoseSVG(pick)}</div>`);
+      renderOptions(c, opts(DIRS[pick].name, ...shuffle(others).slice(0,3).map(k=>DIRS[k].name)), a);
+    }
+  });
+})();
+Q.push({ lesson:7,
+  hint:'N – North (północ), E – East (wschód), S – South (południe), W – West (zachód).',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Na kompasie kierunki opisuje się angielskimi skrótami. Jaką literą oznaczony jest <b>wschód</b>?</p>`);
+    renderInput(c, ['E'], a, 'litera');
+  }
+});
+Q.push({ lesson:7,
+  hint:'Zawrócić to iść w kierunku dokładnie przeciwnym. Przeciwieństwem północnego wschodu jest <b>południowy zachód</b>.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Podróżnik szedł drogą na północny wschód. Zorientował się, że to niewłaściwa trasa, i zawrócił. W którym kierunku poszedł?</p>`);
+    renderOptions(c, opts('na południowy zachód','na południe','na zachód','na południowy wschód'), a);
+  }
+});
+Q.push({ lesson:7,
+  hint:'Słońce zachodzi na <b>zachodzie</b>. Kto jedzie w stronę zachodzącego Słońca, ten zmierza na zachód.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Kowboj jedzie w stronę zachodzącego Słońca. W którym kierunku się porusza?</p>`);
+    renderOptions(c, opts('na zachód','na północ','na południe','na wschód'), a);
+  }
+});
+Q.push({ lesson:7,
+  hint:'O 12.00 Słońce jest na południu. Gdy staniesz do niego tyłem, Twój cień wskazuje <b>północ</b>, wschód jest po prawej, a zachód po lewej.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Jest godzina 12.00, świeci Słońce. Stoisz tyłem do Słońca. Który kierunek wskazuje Twój cień?</p>`);
+    renderOptions(c, opts('północ','południe','wschód','zachód'), a);
+  }
+});
+Q.push({ lesson:7,
+  hint:'20 kroków na północ, 20 na wschód, 20 na południe i 20 na zachód – to kwadrat. Wracasz <b>do miejsca, z którego wyruszyłeś</b>.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Przechodzisz 20 kroków na północ, potem tyle samo kroków kolejno na wschód, na południe i na zachód. Gdzie się znajdziesz?</p>`);
+    renderOptions(c, opts('w miejscu, z którego wyruszyłem','20 kroków na północ od startu','40 kroków na wschód od startu','20 kroków na zachód od startu'), a, true);
+  }
+});
+Q.push({ lesson:7,
+  hint:'Linię, w której powierzchnia Ziemi pozornie styka się z niebem, nazywamy <b>widnokręgiem</b>.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Jak nazywamy linię, w której powierzchnia Ziemi styka się z niebem?</p>`);
+    renderOptions(c, opts('widnokrąg','równik','róża kierunków','horyzont zdarzeń'), a);
+  }
+});
+Q.push({ lesson:7,
+  hint:'Przy kompasie nie może być magnesów ani metalowych przedmiotów, bo zaburzają wskazania igły magnetycznej.',
+  render(c,a){
+    intro(c,`<p class="q-instruction">Wyznaczasz kierunki kompasem. Czego trzeba pilnować?</p>`);
+    renderOptions(c, opts('Żeby w pobliżu kompasu nie było magnesów ani metalowych przedmiotów.',
+      'Żeby kompas był mokry.',
+      'Żeby trzymać kompas pionowo nad głową.',
+      'Żeby co chwilę potrząsać kompasem.'), a, true);
+  }
+});
+
+/* =========================================================
+   STEROWANIE
+   ========================================================= */
+const $ = id => document.getElementById(id);
+const startScreen=$('start-screen'), quizScreen=$('quiz-screen'), resultScreen=$('result-screen');
+const questionArea=$('question-area'), feedback=$('feedback'), nextBtn=$('next-btn');
+const PRAISE = ['Świetnie! ✅','Brawo! 🎉','Dokładnie tak! 👍','Super! ⭐','Tak jest! 🙌','Jak prawdziwy przyrodnik! 🌿'];
+
+const state = { list:[], index:0, score:0, perLesson:{} };
+
+// wybór lekcji
+const pick=$('lesson-pick');
+for(let l=1;l<LESSONS.length;l++){
+  const n=Q.filter(q=>q.lesson===l).length;
+  pick.insertAdjacentHTML('beforeend',`<label><input type="checkbox" value="${l}" checked> ${l}. ${LESSONS[l]}<span class="cnt">${n} pyt.</span></label>`);
+}
+const boxes=()=>[...pick.querySelectorAll('input')];
+function refreshStart(){ $('start-btn').disabled = !boxes().some(b=>b.checked); }
+pick.addEventListener('change',refreshStart);
+$('pick-all').onclick=()=>{ boxes().forEach(b=>b.checked=true); refreshStart(); };
+$('pick-none').onclick=()=>{ boxes().forEach(b=>b.checked=false); refreshStart(); };
+
+function startQuiz(){
+  const chosen=new Set(boxes().filter(b=>b.checked).map(b=>+b.value));
+  state.list=Q.filter(q=>chosen.has(q.lesson));
+  state.index=0; state.score=0; state.perLesson={};
+  state.list.forEach(q=>{ state.perLesson[q.lesson]=state.perLesson[q.lesson]||{ok:0,total:0}; state.perLesson[q.lesson].total++; });
+  startScreen.hidden=true; resultScreen.hidden=true; quizScreen.hidden=false;
+  $('score-total').textContent=state.list.length;
+  showQuestion();
+}
+
+function showQuestion(){
+  const q=state.list[state.index], total=state.list.length;
+  $('progress-fill').style.width=(state.index/total*100)+'%';
+  $('progress-text').textContent=`Pytanie ${state.index+1} z ${total}`;
+  $('score-text').textContent=state.score;
+  $('q-number').textContent=`Lekcja ${q.lesson} · ${LESSONS[q.lesson]}`;
+  feedback.textContent=''; feedback.className='feedback';
+  nextBtn.hidden=true;
+  questionArea.innerHTML='';
+  q.render(questionArea, ok=>handleAnswer(ok,q));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function handleAnswer(ok,q){
+  if(ok){
+    state.score++; state.perLesson[q.lesson].ok++;
+    $('score-text').textContent=state.score;
+    feedback.innerHTML=PRAISE[Math.floor(Math.random()*PRAISE.length)];
+    feedback.className='feedback feedback-good';
+  } else {
+    feedback.innerHTML=`Niepoprawnie.<div class="hint-box">💡 <strong>Wyjaśnienie:</strong> ${q.hint}</div>`;
+    feedback.className='feedback feedback-bad';
+  }
+  nextBtn.hidden=false;
+  nextBtn.focus({preventScroll:true});
+}
+
+function goNext(){
+  state.index++;
+  if(state.index>=state.list.length) showResults(); else showQuestion();
+}
+
+function showResults(){
+  quizScreen.hidden=true; resultScreen.hidden=false;
+  const total=state.list.length, s=state.score;
+  $('result-title').textContent=`Wynik: ${s} / ${total}`;
+  let desc;
+  if(s===total) desc='Perfekcyjnie! Jesteś prawdziwym przyrodnikiem! 🏆';
+  else if(s>=total*0.7) desc='Świetna robota! 👏';
+  else if(s>=total*0.4) desc='Dobrze, jeszcze trochę powtórki i będzie super! 💪';
+  else desc='Przeczytaj jeszcze raz „W skrócie" z każdej lekcji – na pewno pójdzie lepiej! 📚';
+  $('result-desc').textContent=desc;
+  const bd=$('breakdown'); bd.innerHTML='';
+  Object.keys(state.perLesson).sort((x,y)=>x-y).forEach(l=>{
+    const {ok,total:t}=state.perLesson[l], pct=ok/t;
+    const color = pct>=0.7 ? 'var(--good)' : pct>=0.4 ? '#f59e0b' : 'var(--bad)';
+    bd.insertAdjacentHTML('beforeend',`<div class="bd-row"><span>${l}. ${LESSONS[l]}</span><span class="bd-score">${ok}/${t}</span><div class="bd-bar"><div class="bd-fill" style="width:${pct*100}%;background:${color}"></div></div></div>`);
+  });
+}
+
+$('start-btn').onclick=startQuiz;
+$('restart-btn').onclick=()=>{ resultScreen.hidden=true; startScreen.hidden=false; };
+nextBtn.onclick=goNext;
+</script>
+</body>
+</html>
